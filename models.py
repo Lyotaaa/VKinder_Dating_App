@@ -1,7 +1,6 @@
 import sqlalchemy as sq
 from sqlalchemy.orm import declarative_base, relationship
 
-
 Base = declarative_base()
 
 
@@ -48,7 +47,6 @@ class Favorites(Base):
 
     def __str__(self):
         return f'user_id: {self.user_id} | favorites_url: {self.favorites_url}'
-
 
 
 def create_tables(engine):
