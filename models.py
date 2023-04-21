@@ -7,9 +7,10 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = 'user'
 
-    user_id = sq.Column(sq.Integer, primary_key=True)
-    age = sq.Column(sq.Integer)
+    user_url = sq.Column(sq.String(length=200), primary_key=True)
+    age_range = sq.Column(sq.String(length=6))  # 18-999
     gender = sq.Column(sq.Boolean)
+    city = sq.Column(sq.String(length=50))
 
     likes = relationship('Likes', back_populates='user')
     dislikes = relationship('Dislikes', back_populates='user')
