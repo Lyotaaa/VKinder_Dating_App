@@ -19,35 +19,35 @@ class User(Base):
 
 class Likes(Base):
     __tablename__ = 'likes'
-    likes_url = sq.Column(sq.String(length=200), primary_key=True)
+    like_url = sq.Column(sq.String(length=200), primary_key=True)
     user_id = sq.Column(sq.Integer, sq.ForeignKey('user.user_id'), nullable=False)
 
     user = relationship('User', back_populates='likes')
 
     def __str__(self):
-        return f'user_id: {self.user_id} | likes_url: {self.likes_url}'
+        return f'user_id: {self.user_id} | like_url: {self.like_url}'
 
 
 class Dislikes(Base):
     __tablename__ = 'dislikes'
-    dislikes_url = sq.Column(sq.String(length=200), primary_key=True)
+    dislike_url = sq.Column(sq.String(length=200), primary_key=True)
     user_id = sq.Column(sq.Integer, sq.ForeignKey('user.user_id'), nullable=False)
 
     user = relationship('User', back_populates='dislikes')
 
     def __str__(self):
-        return f'user_id: {self.user_id} | dislikes_url: {self.dislikes_url}'
+        return f'user_id: {self.user_id} | dislike_url: {self.dislike_url}'
 
 
 class Favorites(Base):
     __tablename__ = 'favorites'
-    favorites_url = sq.Column(sq.String(length=200), primary_key=True)
+    favorite_url = sq.Column(sq.String(length=200), primary_key=True)
     user_id = sq.Column(sq.Integer, sq.ForeignKey('user.user_id'), nullable=False)
 
     user = relationship('User', back_populates='favorites')
 
     def __str__(self):
-        return f'user_id: {self.user_id} | favorites_url: {self.favorites_url}'
+        return f'user_id: {self.user_id} | favorite_url: {self.favorite_url}'
 
 
 def create_tables(engine):
