@@ -1,7 +1,6 @@
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
-from models import User, Likes, Dislikes, Favorites
-
+from models import User, Likes, Dislikes, Favorites, Blocklist
 
 DSN = 'postgresql://postgres:6996@localhost:5432/VKinder'
 engine = sqlalchemy.create_engine(DSN)
@@ -10,43 +9,63 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 
-def create_user(user_url, age_range, gender, city):
-    existing_user = session.query(User).filter_by(user_url=user_url).first()
+# User
+def update_user(user_id, age_range, gender, city):
+    existing_user = session.query(User).filter_by(user_id=user_id).first()
     if existing_user:
         existing_user.age_range = age_range
         existing_user.gender = gender
         existing_user.city = city
         session.commit()
     else:
-        session.add(User(user_url=user_url, age_range=age_range, gender=gender, city=city))
+        session.add(User(user_id=user_id, age_range=age_range, gender=gender, city=city))
         session.commit()
 
 
-def press_like(like_url, user_url):
-    existing_like = session.query(Likes).filter_by(like_url=like_url, user_url=user_url).first()
+def get_user(user_id):
+    return session.query(User).filter_by(user_id=user_id).first()
+
+
+# Likes
+def press_like(user_id, like_id):
+    existing_like = session.query(Likes).filter_by(user_id=user_id, like_id=like_id, ).first()
     if existing_like:
         session.delete(existing_like)
         session.commit()
     else:
-        session.add(Likes(like_url=like_url, user_url=user_url))
+        session.add(Likes(user_id=user_id, like_id=like_id))
         session.commit()
 
 
-def press_dislike(dislike_url, user_url):
-    existing_dislike = session.query(Dislikes).filter_by(dislike_url=dislike_url, user_url=user_url).first()
+def get_likes(user_id):
+    return session.query(Likes).filter_by(user_id=user_id)
+
+
+# Dislikes
+def press_dislike(user_id, dislike_id):
+    existing_dislike = session.query(Dislikes).filter_by(user_id=user_id, dislike_id=dislike_id).first()
     if existing_dislike:
         session.delete(existing_dislike)
         session.commit()
     else:
-        session.add(Dislikes(dislike_url=dislike_url, user_url=user_url))
+        session.add(Dislikes(user_id=user_id, dislike_id=dislike_id))
         session.commit()
 
 
-def press_favorite(favorite_url, user_url):
-    existing_favorite = session.query(Favorites).filter_by(favorite_url=favorite_url, user_url=user_url).first()
+def get_dislikes(user_id):
+    return session.query(Dislikes).filter_by(user_id=user_id)
+
+
+# Favorites
+def press_favorite(user_id, favorite_id):
+    existing_favorite = session.query(Favorites).filter_by(user_id=user_id, favorite_id=favorite_id).first()
     if existing_favorite:
         session.delete(existing_favorite)
         session.commit()
     else:
-        session.add(Favorites(favorite_url=favorite_url, user_url=user_url))
+        session.add(Favorites(user_id=user_id, favorite_id=favorite_id))
         session.commit()
+
+
+def get_favorites(user_id):
+    return session.query(Favorites).filter_by(user_id=user_id)
