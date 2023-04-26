@@ -1,5 +1,6 @@
 import sqlalchemy
 from models import create_tables
+from data_changers import update_user, get_user, press_like, get_likes, press_dislike, get_dislikes, press_favorite, get_favorites
 
 
 
