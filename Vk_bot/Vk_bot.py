@@ -3,6 +3,7 @@ from random import randrange
 from vk_api.longpoll import VkLongPoll, VkEventType
 from configparser import ConfigParser
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
+import sys
 
 
 def open_a_token(file_name):
@@ -20,13 +21,16 @@ class VkBot:
         self.vk_api = self.vk_session.get_api()
         self.long_pool = VkLongPoll(self.vk_session)
 
-    def write_msg(self, user_id, message, keyboard=None, attachment=None):
+    def write_msg(self, user_id, message=None, keyboard=None, attachment=None):
         """Сообщение от бота: кому, сообщение, id собщения, кнопки, картинки"""
         post = {
             "user_id": user_id,
-            "message": message,
             "random_id": randrange(10**7),
         }
+        if message != None:
+            post["message"] = message
+        else:
+            post = post
         if attachment != None:
             post["attachment"] = attachment
         else:
@@ -49,7 +53,7 @@ class VkBot:
 
     def set_key_parameters(self, buttons, but_col):
         """Задаём цвет, количество кнопок в ответе бота"""
-        keyboard = VkKeyboard(inline=True)
+        keyboard = VkKeyboard()
         if not isinstance(buttons, list) and not isinstance(but_col, list):
             buttons = [buttons]
             but_col = [but_col]
@@ -74,127 +78,182 @@ class VkBot:
                 return message, user_id
 
     def command_list_output(self):
-        response = "Добро пожаловать в бот Vkinder."
+        response = "Добро пожаловать в бот Vkinder.\nВыберите команду!"
         return response
 
+    def favorites_list(self):
+        return [1, 2, 3]  # Должен вернуть список избраных пользователей,
+        # при выборе пользователя, должен вывести фотографии и страницу
+        # так возможность удалить его из это БД
+
+    def like_list(self):
+        return [1, 2, 3]  # Должен вернуть список понравившехся пользователей,
+        # при выборе пользователя, должен вывести фотографии и страницу
+        # так же возможность удалить пользователя из БД
+
+    def black_list(self):
+        return [1, 2, 3]  # Должен вернуть черный список пользователей,
+        # при выборе пользователя, должен вывести фотографии и страницу
+        # так же возможность удалить его из БД
+
+
+def main(number=None):
     # Кнопки главного меню
-    def greetings_bot(self):
+    def greetings_bot():
         buttons = [
-            "Вывести избранных",
-            "Вывести черный список",
-            "Вывести понравившихся",
+            "Избранные",
+            "Мне нравится",
+            "Черный список",
             "Начать поиск",
             "Завершить работу с ботом",
         ]
         but_col = vk_session.but_col()
         keyboard = vk_session.set_key_parameters(
-            buttons, [but_col[3], but_col[3], but_col[3], but_col[0], but_col[1]]
+            buttons, [but_col[2], but_col[2], but_col[2], but_col[0], but_col[1]]
         )
         return keyboard
 
     # Показать гавлное меню
-    def show_main_menu(self):
-        keyboard = self.greegreetings_bot()
+    def show_main_menu():
+        keyboard = greetings_bot()
         vk_session.write_msg(user_id, vk_session.command_list_output(), keyboard)
 
-    def favorites_list(self):
-        pass  # Должен вернуть список избраных пользователей,
-        # при выборе пользователя, должен вывести фотографии и страницу
-        # так возможность удалить его из это БД
+    """Стартовое меню"""
 
-    def like_list(self):
-        pass  # Должен вернуть список понравившехся пользователей,
-        # при выборе пользователя, должен вывести фотографии и страницу
-        # так же возможность удалить пользователя из БД
+    def start_bot():
+        show_main_menu()
 
-    def black_list(self):
-        pass  # Должен вернуть черный список пользователей,
-        # при выборе пользователя, должен вывести фотографии и страницу
-        # так же возможность удалить его из БД
+    """Сообщение боту"""
+
+    def query_bot():
+        message, user_id = vk_session.get_message()
+        return message, user_id
+
+    vk_session = VkBot(open_a_token("confing.ini"))
+    message, user_id = query_bot()
+    if message.lower() == "привет":
+        """Показывает главное меню"""
+        start_bot()
+        """Следующий запрос на сообщение боту"""
+    elif message.lower() == "избранные":
+        result = vk_session.favorites_list()
+        if result == []:
+            msg = "Список избранных пуст"
+            but_col = vk_session.but_col()
+            keyboard = vk_session.set_key_parameters(
+                "Вернуться в главное меню", but_col[1]
+            )
+            vk_session.write_msg(user_id, msg, keyboard)
+            message, user_id = query_bot()
+            if message == "вернуться в главное меню":
+                start_bot()
+                main()
+        else:
+            msg = "Избранные"
+            buttons = ["Удалилить из избранного", "Вернуться в главное меню"]
+            but_col = vk_session.but_col()
+            keyboard = vk_session.set_key_parameters(buttons, [but_col[1], but_col[0]])
+            vk_session.write_msg(user_id, msg, keyboard=None)
+            for i in result:
+                vk_session.write_msg(user_id, i, keyboard=None)
+            vk_session.write_msg(user_id, "Выберите команду", keyboard)
+            message, user_id = query_bot()
+            if message == "вернуться в главное меню":
+                start_bot()
+                main()
+            elif message.lower() == "удалилить из избранного":
+                pass  # Тут работа с БД
+    elif message.lower() == "мне нравится":
+        result = vk_session.like_list()
+        if result == []:
+            msg = "Список понравившихся пуст"
+            but_col = vk_session.but_col()
+            keyboard = vk_session.set_key_parameters(
+                "Вернуться в главное меню", but_col[1]
+            )
+            vk_session.write_msg(user_id, msg, keyboard)
+            message, user_id = query_bot()
+            if message == "вернуться в главное меню":
+                start_bot()
+                main()
+        else:
+            msg = "Мне нравится"
+            buttons = ["Удалилить из понравившихся", "Вернуться в главное меню"]
+            but_col = vk_session.but_col()
+            keyboard = vk_session.set_key_parameters(buttons, [but_col[1], but_col[0]])
+            vk_session.write_msg(user_id, msg, keyboard=None)
+            for i in result:
+                vk_session.write_msg(user_id, i, keyboard=None)
+            vk_session.write_msg(user_id, "Выберите команду", keyboard)
+            message, user_id = query_bot()
+            if message == "вернуться в главное меню":
+                start_bot()
+                main()
+            elif message.lower() == "удалилить из понравившихся":
+                pass  # Тут работа с БД
+    elif message.lower() == "черный список":
+        result = vk_session.like_list()
+        if result == []:
+            msg = "Черный список пуст"
+            but_col = vk_session.but_col()
+            keyboard = vk_session.set_key_parameters(
+                "Вернуться в главное меню", but_col[1]
+            )
+            vk_session.write_msg(user_id, msg, keyboard)
+            message, user_id = query_bot()
+            if message == "вернуться в главное меню":
+                start_bot()
+                main()
+        else:
+            msg = "Черный список"
+            buttons = ["Удалилить из черного списка", "Вернуться в главное меню"]
+            but_col = vk_session.but_col()
+            keyboard = vk_session.set_key_parameters(buttons, [but_col[1], but_col[0]])
+            vk_session.write_msg(user_id, msg, keyboard=None)
+            for i in result:
+                vk_session.write_msg(user_id, i, keyboard=None)
+            vk_session.write_msg(user_id, "Выберите команду", keyboard)
+            message, user_id = query_bot()
+            if message == "вернуться в главное меню":
+                start_bot()
+                main()
+            elif message.lower() == "удалилить из понравившихся":
+                pass  # Тут работа с БД
+
+    elif message.lower() == "завершить работу с ботом":
+        msg = "До свидания"
+        vk_session.write_msg(user_id, msg, keyboard=None)
+        sys.exit()
 
 
 if __name__ == "__main__":
     while True:
-        vk_session = VkBot(open_a_token("confing.ini"))
-        message, user_id = vk_session.get_message()
-        if message.lower() == "привет":
-            # Показывает главное меню
-            vk_session.show_main_menu()
-            # Следующий запрос на сообщение боту
-            message, user_id = vk_session.get_message()
-            if message.lower() == "Вывести избранных":
-                result = vk_session.favorites_list()
-                if result == []:
-                    msg = "Список избранных пуст"
-                    but_col = vk_session.but_col()
-                    keyboard = vk_session.set_key_parameters(
-                        "Вернуться в главное меню", but_col[1]
-                    )
-                    vk_session.write_msg(user_id, msg, keyboard)
-                else:
-                    msg = "Список избранных"
-                    buttons = "Вернуться в главное меню"
-                    but_col = vk_session.but_col()
-                    keyboard = vk_session.set_key_parameters(buttons, but_col()[1])
-                    vk_session.set_key_parameters(
-                        "Вернуться в главное меню", vk_session.but_col()[1]
-                    )
-                    vk_session.write_msg(
-                        user_id,
-                    )
-            elif message == "Вывести понравившихся":
-                result = vk_session.like_list()
-                if result == []:
-                    msg = "Список понравившихся пуст"
-                    but_col = vk_session.but_col()
-                    keyboard = vk_session.set_key_parameters("Назад", but_col[1])
-                else:
-                    msg = "Список понравившихся"
-                    result  # # Дальше управление с Бот и БД, удалить, перенести и т.д
+        main()
 
-                # vk_session.
-            elif message == "Вывести черный список":
-                if black_list == []:
-                    msg = "Черный список пуст"
-                    but_col = vk_session.but_col()
-                    keyboard = vk_session.set_key_parameters("Назад", but_col[1])
-                    vk_session.write_msg(user_id, msg, keyboard)
-                else:
-                    msg = "Черный список"
-                    get_black_list()  # Дальше управление с Бот и БД, удалить, перенести и т.д
-            elif message.lower() == "завершить работу с ботом":
-                msg = "До свидания"
-                vk_session.write_msg(user_id, msg, keyboard=None)
-                break
-            elif message == "Назад":
-                keyboard = greetings_bot()
-                vk_session.write_msg(
-                    user_id, vk_session.command_list_output(), keyboard
-                )
-            elif message == "Начать поиск":
-                msg = "Выберите пол особи"
-                buttons = ["Особь женского пола", "Особь мужского пола"]
-                keyboard = vk_session.set_key_parameters(
-                    buttons, [but_col[0], but_col[2]]
-                )
-                vk_session.write_msg(user_id, msg, keyboard)
-                message, user_id = vk_session.get_message()
-                if message == "Особь женского пола":
-                    msg = "Выбирете возсрат особи"
-                    buttons = ["18-25", "26-35", "36-45", "46-55", "56+", "Назад"]
-                    keyboard = vk_session.set_key_parameters(
-                        buttons,
-                        [
-                            but_col[3],
-                            but_col[3],
-                            but_col[3],
-                            but_col[3],
-                            but_col[3],
-                            but_col[1],
-                        ],
-                    )
-                    vk_session.write_msg(user_id, msg, keyboard)
-                    message, user_id = vk_session.get_message()
-                    if message in ["18-25", "26-35", "36-45", "46-55", "56+"]:
-                        msg = "Выбирете "
-                        buttons = ["18-25", "26-35", "36-45", "46-55", "56+", "Назад"]
+        # elif message == "Начать поиск":
+        #     msg = "Выберите пол особи"
+        #     buttons = ["Особь женского пола", "Особь мужского пола"]
+        #     keyboard = vk_session.set_key_parameters(
+        #         buttons, [but_col[0], but_col[2]]
+        #     )
+        #     vk_session.write_msg(user_id, msg, keyboard)
+        #     message, user_id = vk_session.get_message()
+        #     if message == "Особь женского пола":
+        #         msg = "Выбирете возсрат особи"
+        #         buttons = ["18-25", "26-35", "36-45", "46-55", "56+", "Назад"]
+        #         keyboard = vk_session.set_key_parameters(
+        #             buttons,
+        #             [
+        #                 but_col[3],
+        #                 but_col[3],
+        #                 but_col[3],
+        #                 but_col[3],
+        #                 but_col[3],
+        #                 but_col[1],
+        #             ],
+        #         )
+        #         vk_session.write_msg(user_id, msg, keyboard)
+        #         message, user_id = vk_session.get_message()
+        #         if message in ["18-25", "26-35", "36-45", "46-55", "56+"]:
+        #             msg = "Выбирете "
+        #             buttons = ["18-25", "26-35", "36-45", "46-55", "56+", "Назад"]
