@@ -192,7 +192,7 @@ def main(number=None):
             elif message.lower() == "удалилить из понравившихся":
                 pass  # Тут работа с БД
     elif message.lower() == "черный список":
-        result = vk_session.like_list()
+        result = vk_session.black_list()
         if result == []:
             msg = "Черный список пуст"
             but_col = vk_session.but_col()
