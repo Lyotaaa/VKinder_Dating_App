@@ -129,6 +129,36 @@ def main(number=None):
         message, user_id = vk_session.get_message()
         return message, user_id
 
+    def start_search():
+        msg = "Выберите пол особи"
+        buttons = [
+            "Особь женского пола",
+            "Особь мужского пола",
+            "Вернуться в главное меню",
+        ]
+        but_col = vk_session.but_col()
+        keyboard = vk_session.set_key_parameters(
+            buttons, [but_col[0], but_col[2], but_col[1]]
+        )
+        vk_session.write_msg(user_id, msg, keyboard)
+
+    def age_selection():
+        msg = "Выберите возраст особи"
+        buttons = ["18-25", "26-35", "36-45", "46-55", "56+", "Назад"]
+        but_col = vk_session.but_col()
+        keyboard = vk_session.set_key_parameters(
+            buttons,
+            [
+                but_col[3],
+                but_col[3],
+                but_col[3],
+                but_col[3],
+                but_col[3],
+                but_col[1],
+            ],
+        )
+        vk_session.write_msg(user_id, msg, keyboard)
+
     vk_session = VkBot(open_a_token("confing.ini"))
     message, user_id = query_bot()
     if message.lower() == "привет":
@@ -219,6 +249,19 @@ def main(number=None):
                 main()
             elif message.lower() == "удалилить из понравившихся":
                 pass  # Тут работа с БД
+    elif message.lower() == "начать поиск":
+        start_search()
+        message, user_id = vk_session.get_message()
+        if message.lower() == "особь женского пола":
+            age_selection()
+
+        elif message.lower() == "особь мужского пола":
+            age_selection()
+
+
+        elif message == "вернуться в главное меню":
+            start_bot()
+            main()
 
     elif message.lower() == "завершить работу с ботом":
         msg = "До свидания"
@@ -229,31 +272,4 @@ def main(number=None):
 if __name__ == "__main__":
     while True:
         main()
-
-        # elif message == "Начать поиск":
-        #     msg = "Выберите пол особи"
-        #     buttons = ["Особь женского пола", "Особь мужского пола"]
-        #     keyboard = vk_session.set_key_parameters(
-        #         buttons, [but_col[0], but_col[2]]
-        #     )
-        #     vk_session.write_msg(user_id, msg, keyboard)
-        #     message, user_id = vk_session.get_message()
-        #     if message == "Особь женского пола":
-        #         msg = "Выбирете возсрат особи"
-        #         buttons = ["18-25", "26-35", "36-45", "46-55", "56+", "Назад"]
-        #         keyboard = vk_session.set_key_parameters(
-        #             buttons,
-        #             [
-        #                 but_col[3],
-        #                 but_col[3],
-        #                 but_col[3],
-        #                 but_col[3],
-        #                 but_col[3],
-        #                 but_col[1],
-        #             ],
-        #         )
-        #         vk_session.write_msg(user_id, msg, keyboard)
-        #         message, user_id = vk_session.get_message()
-        #         if message in ["18-25", "26-35", "36-45", "46-55", "56+"]:
-        #             msg = "Выбирете "
-        #             buttons = ["18-25", "26-35", "36-45", "46-55", "56+", "Назад"]
+        
