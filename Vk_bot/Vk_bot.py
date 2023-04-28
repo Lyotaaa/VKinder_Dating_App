@@ -4,6 +4,7 @@ from vk_api.longpoll import VkLongPoll, VkEventType
 from configparser import ConfigParser
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 import sys
+import time
 
 
 def open_a_token(file_name):
@@ -53,7 +54,7 @@ class VkBot:
 
     def set_key_parameters(self, buttons, but_col):
         """Задаём цвет, количество кнопок в ответе бота"""
-        keyboard = VkKeyboard()
+        keyboard = VkKeyboard(inline=True)
         if not isinstance(buttons, list) and not isinstance(but_col, list):
             buttons = [buttons]
             but_col = [but_col]
@@ -97,7 +98,7 @@ class VkBot:
         # так же возможность удалить его из БД
 
 
-def main(number=None):
+def main():
     # Кнопки главного меню
     def greetings_bot():
         buttons = [
@@ -129,43 +130,7 @@ def main(number=None):
         message, user_id = vk_session.get_message()
         return message, user_id
 
-    def start_search():
-        msg = "Выберите пол особи"
-        buttons = [
-            "Особь женского пола",
-            "Особь мужского пола",
-            "Вернуться в главное меню",
-        ]
-        but_col = vk_session.but_col()
-        keyboard = vk_session.set_key_parameters(
-            buttons, [but_col[0], but_col[2], but_col[1]]
-        )
-        vk_session.write_msg(user_id, msg, keyboard)
-
-    def age_selection():
-        msg = "Выберите возраст особи"
-        buttons = ["18-25", "26-35", "36-45", "46-55", "56+", "Назад"]
-        but_col = vk_session.but_col()
-        keyboard = vk_session.set_key_parameters(
-            buttons,
-            [
-                but_col[3],
-                but_col[3],
-                but_col[3],
-                but_col[3],
-                but_col[3],
-                but_col[1],
-            ],
-        )
-        vk_session.write_msg(user_id, msg, keyboard)
-
-    vk_session = VkBot(open_a_token("confing.ini"))
-    message, user_id = query_bot()
-    if message.lower() == "привет":
-        """Показывает главное меню"""
-        start_bot()
-        """Следующий запрос на сообщение боту"""
-    elif message.lower() == "избранные":
+    def favorites_search(user_id):
         result = vk_session.favorites_list()
         if result == []:
             msg = "Список избранных пуст"
@@ -193,7 +158,8 @@ def main(number=None):
                 main()
             elif message.lower() == "удалилить из избранного":
                 pass  # Тут работа с БД
-    elif message.lower() == "мне нравится":
+
+    def like_search(user_id):
         result = vk_session.like_list()
         if result == []:
             msg = "Список понравившихся пуст"
@@ -221,7 +187,8 @@ def main(number=None):
                 main()
             elif message.lower() == "удалилить из понравившихся":
                 pass  # Тут работа с БД
-    elif message.lower() == "черный список":
+    
+    def black_search(user_id):
         result = vk_session.black_list()
         if result == []:
             msg = "Черный список пуст"
@@ -249,20 +216,91 @@ def main(number=None):
                 main()
             elif message.lower() == "удалилить из понравившихся":
                 pass  # Тут работа с БД
-    elif message.lower() == "начать поиск":
-        start_search()
-        message, user_id = vk_session.get_message()
+
+    def start_search(user_id):
+        get_parametrs = {}
+        msg = "Выберите пол особи"
+        buttons = [
+            "Особь женского пола",
+            "Особь мужского пола",
+            "Вернуться в главное меню",
+        ]
+        but_col = vk_session.but_col()
+        keyboard = vk_session.set_key_parameters(
+            buttons, [but_col[0], but_col[2], but_col[1]]
+        )
+        vk_session.write_msg(user_id, msg, keyboard)
+        message, user_id = query_bot()
         if message.lower() == "особь женского пола":
-            age_selection()
-
+            get_parametrs[
+                "sex"
+            ] = "1"  # ВОТ ТУТ НЕ ЗНАЮ В ОТВЕТЕ ОТ ВКОНТАКТЕ ЧТО ПЕРЕДАЕТСЯ INT ИЛИ STR
+            back()
+            message, user_id = query_bot()
+            if message.lower() == "назад, к выбору пола.":
+                start_search(user_id)
+            elif int(message) >= 18:
+                get_parametrs["age"] = message
+                msg = "Напишите город для поиска"
+                vk_session.write_msg(user_id, msg, keyboard=None)
+                message, user_id = query_bot()
+                get_parametrs["city"] = message
+                msg = "Данные записаны, начинаем поиск!"
+                vk_session.write_msg(user_id, msg, keyboard=None)
+            elif int(message) < 18:
+                msg = "Аккуратно! Статься 134 УК РФ!"
+                vk_session.write_msg(user_id, msg, keyboard=None)
+                time.sleep(5)
+                start_search(user_id)
         elif message.lower() == "особь мужского пола":
-            age_selection()
-
-
+            get_parametrs[
+                "sex"
+            ] = "1"  # ВОТ ТУТ НЕ ЗНАЮ В ОТВЕТЕ ОТ ВКОНТАКТЕ ЧТО ПЕРЕДАЕТСЯ INT ИЛИ STR
+            back()
+            message, user_id = query_bot()
+            if message.lower() == "назад, к выбору пола.":
+                start_search(user_id)
+            elif int(message) >= 18:
+                get_parametrs["age"] = message
+                msg = "Напишите город для поиска"
+                vk_session.write_msg(user_id, msg, keyboard=None)
+                message, user_id = query_bot()
+                get_parametrs["city"] = message
+                msg = "Данные записаны, начинаем поиск!"
+                vk_session.write_msg(user_id, msg, keyboard=None)
+            elif int(message) < 18:
+                msg = "Аккуратно! Статься 134 УК РФ!"
+                vk_session.write_msg(user_id, msg, keyboard=None)
+                time.sleep(5)
+                start_search(user_id)
         elif message == "вернуться в главное меню":
             start_bot()
             main()
 
+        return get_parametrs
+
+    def back():
+        msg = "Напишите возраст особи"
+        buttons = "Назад, к выбору пола."
+        but_col = vk_session.but_col()
+        keyboard = vk_session.set_key_parameters(buttons, but_col[1])
+        vk_session.write_msg(user_id, msg, keyboard)
+
+    # Основной цикл
+    vk_session = VkBot(open_a_token("confing.ini"))
+    message, user_id = query_bot()
+    if message.lower() == "привет":
+        """Показывает главное меню"""
+        start_bot()
+        """Следующий запрос на сообщение боту"""
+    elif message.lower() == "избранные":
+        favorites_search(user_id)
+    elif message.lower() == "мне нравится":
+        like_search(user_id)
+    elif message.lower() == "черный список":
+        black_search(user_id)
+    elif message.lower() == "начать поиск":
+        start_search(user_id)
     elif message.lower() == "завершить работу с ботом":
         msg = "До свидания"
         vk_session.write_msg(user_id, msg, keyboard=None)
@@ -272,4 +310,3 @@ def main(number=None):
 if __name__ == "__main__":
     while True:
         main()
-        
