@@ -54,7 +54,7 @@ class VkBot:
 
     def set_key_parameters(self, buttons, but_col):
         """Задаём цвет, количество кнопок в ответе бота"""
-        keyboard = VkKeyboard(inline=True)
+        keyboard = VkKeyboard(one_time=True)
         if not isinstance(buttons, list) and not isinstance(but_col, list):
             buttons = [buttons]
             but_col = [but_col]
@@ -187,7 +187,7 @@ def main():
                 main()
             elif message.lower() == "удалилить из понравившихся":
                 pass  # Тут работа с БД
-    
+
     def black_search(user_id):
         result = vk_session.black_list()
         if result == []:
@@ -214,10 +214,45 @@ def main():
             if message == "вернуться в главное меню":
                 start_bot()
                 main()
-            elif message.lower() == "удалилить из понравившихся":
+            elif message.lower() == "удалилить из черного списка":
                 pass  # Тут работа с БД
 
+    def back_to_gender():
+        msg = "Напишите возраст особи"
+        buttons = "Назад, к выбору пола."
+        but_col = vk_session.but_col()
+        keyboard = vk_session.set_key_parameters(buttons, but_col[1])
+        vk_session.write_msg(user_id, msg, keyboard)
+
+    def back_to_age():
+        msg = "Напишите город для поиска"
+        buttons = "Назад, к выбору возраста."
+        but_col = vk_session.but_col()
+        keyboard = vk_session.set_key_parameters(buttons, but_col[1])
+        vk_session.write_msg(user_id, msg, keyboard)
+
     def start_search(user_id):
+        def search_age_city():
+            message, user_id = query_bot()
+            if message.lower() == "назад, к выбору пола.":
+                start_search(user_id)
+            elif int(message) >= 18:
+                get_parametrs["age"] = message
+                back_to_age()
+                message, user_id = query_bot()
+                if message.lower() == "назад, к выбору возраста.":
+                    back_to_gender()
+                    search_age_city()
+                else:
+                    get_parametrs["city"] = message
+                    msg = "Данные записаны, начинаем поиск!"
+                    vk_session.write_msg(user_id, msg, keyboard=None)
+            elif int(message) < 18:
+                msg = "Аккуратно! Статься 134 УК РФ!"
+                vk_session.write_msg(user_id, msg, keyboard=None)
+                time.sleep(5)
+                start_search(user_id)
+
         get_parametrs = {}
         msg = "Выберите пол особи"
         buttons = [
@@ -231,65 +266,28 @@ def main():
         )
         vk_session.write_msg(user_id, msg, keyboard)
         message, user_id = query_bot()
+
         if message.lower() == "особь женского пола":
             get_parametrs[
                 "sex"
             ] = "1"  # ВОТ ТУТ НЕ ЗНАЮ В ОТВЕТЕ ОТ ВКОНТАКТЕ ЧТО ПЕРЕДАЕТСЯ INT ИЛИ STR
-            back()
-            message, user_id = query_bot()
-            if message.lower() == "назад, к выбору пола.":
-                start_search(user_id)
-            elif int(message) >= 18:
-                get_parametrs["age"] = message
-                msg = "Напишите город для поиска"
-                vk_session.write_msg(user_id, msg, keyboard=None)
-                message, user_id = query_bot()
-                get_parametrs["city"] = message
-                msg = "Данные записаны, начинаем поиск!"
-                vk_session.write_msg(user_id, msg, keyboard=None)
-            elif int(message) < 18:
-                msg = "Аккуратно! Статься 134 УК РФ!"
-                vk_session.write_msg(user_id, msg, keyboard=None)
-                time.sleep(5)
-                start_search(user_id)
+            back_to_gender()
+            search_age_city()
         elif message.lower() == "особь мужского пола":
             get_parametrs[
                 "sex"
             ] = "1"  # ВОТ ТУТ НЕ ЗНАЮ В ОТВЕТЕ ОТ ВКОНТАКТЕ ЧТО ПЕРЕДАЕТСЯ INT ИЛИ STR
-            back()
-            message, user_id = query_bot()
-            if message.lower() == "назад, к выбору пола.":
-                start_search(user_id)
-            elif int(message) >= 18:
-                get_parametrs["age"] = message
-                msg = "Напишите город для поиска"
-                vk_session.write_msg(user_id, msg, keyboard=None)
-                message, user_id = query_bot()
-                get_parametrs["city"] = message
-                msg = "Данные записаны, начинаем поиск!"
-                vk_session.write_msg(user_id, msg, keyboard=None)
-            elif int(message) < 18:
-                msg = "Аккуратно! Статься 134 УК РФ!"
-                vk_session.write_msg(user_id, msg, keyboard=None)
-                time.sleep(5)
-                start_search(user_id)
+            back_to_gender()
+            search_age_city()
         elif message == "вернуться в главное меню":
             start_bot()
             main()
-
         return get_parametrs
-
-    def back():
-        msg = "Напишите возраст особи"
-        buttons = "Назад, к выбору пола."
-        but_col = vk_session.but_col()
-        keyboard = vk_session.set_key_parameters(buttons, but_col[1])
-        vk_session.write_msg(user_id, msg, keyboard)
 
     # Основной цикл
     vk_session = VkBot(open_a_token("confing.ini"))
     message, user_id = query_bot()
-    if message.lower() == "привет":
+    if message.lower() == "1":
         """Показывает главное меню"""
         start_bot()
         """Следующий запрос на сообщение боту"""
