@@ -1,1 +1,3 @@
 confing.ini
+venv\*
+.idea\*
