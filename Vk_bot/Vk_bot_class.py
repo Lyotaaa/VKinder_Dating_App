@@ -77,8 +77,9 @@ class VkBot:
         """Приветствие"""
         response = "Добро пожаловать в бот Vkinder.\nВыберите команду!"
         return response
-    
-    """Вывести избранных"""
+
+    """Работа со списком избранных"""
+
     def favorites_list(self, user_id):
         def the_end():
             if count >= len(favorites_list) - 1:
@@ -92,7 +93,7 @@ class VkBot:
                 elif message.lower() == "вывести избранных":
                     favorites_list(user_id)
 
-        base_data = False  # Тут вставить БД
+        base_data = []  # Тут вставить БД
         favorites_list = base_data
         msg = "Избранные"
         self.write_msg(user_id, msg, keyboard=None)
@@ -100,7 +101,7 @@ class VkBot:
             msg = "Список избранных пуст"
             but_col = self.but_col()
             keyboard = self.set_key_parameters("Вернуться в главное меню", but_col[1])
-            self.vk_session.write_msg(user_id, msg, keyboard)
+            self.write_msg(user_id, msg, keyboard)
             message, user_id = self.query_bot()
             if message == "вернуться в главное меню":
                 self.start_bot()
@@ -132,24 +133,116 @@ class VkBot:
                 elif message.lower() == "вернуться в главное меню":
                     self.start_bot()
 
-        """Список избранных"""
-        return [1, 2, 3]  # Должен вернуть список избраных пользователей,
-        # при выборе пользователя, должен вывести фотографии и страницу
-        # так возможность удалить его из это БД
+    """Работа со списком мне нравится"""
 
-    def like_list(self):
-        """Список мне нравится"""
-        return [1, 2, 3]  # Должен вернуть список понравившехся пользователей,
-        # при выборе пользователя, должен вывести фотографии и страницу
-        # так же возможность удалить пользователя из БД
+    def like_list(self, user_id):
+        def the_end():
+            if count >= len(like_list) - 1:
+                buttons = ["Вернуться в главное меню", "Показать мне нравится"]
+                but_col = self.but_col()
+                keyboard = self.set_key_parameters(buttons, [but_col[1], but_col[0]])
+                self.write_msg(user_id, "Это была последняя анкета", keyboard)
+                message, user_id = self.get_message()
+                if message.lower() == "вернуться в главное меню":
+                    self.start_bot()
+                elif message.lower() == "Показать мне нравится":
+                    like_list(user_id)
 
-    def black_list(self):
-        """Черный список"""
-        return [1, 2, 3]  # Должен вернуть черный список пользователей,
-        # при выборе пользователя, должен вывести фотографии и страницу
-        # так же возможность удалить его из БД
+        base_data = []  # Тут вставить БД
+        like_list = base_data
+        msg = "Мне нравится"
+        self.write_msg(user_id, msg, keyboard=None)
+        if like_list == []:
+            msg = "Список мне нравится пуст!"
+            but_col = self.but_col()
+            keyboard = self.set_key_parameters("Вернуться в главное меню", but_col[1])
+            self.write_msg(user_id, msg, keyboard)
+            message, user_id = self.query_bot()
+            if message == "вернуться в главное меню":
+                self.start_bot()
+        elif like_list != []:
+            for count, user in enumerate(like_list):
+                self.write_msg(
+                    user_id,
+                    f"{user.first_name}, {user.last_name}, 'Ссылка',",
+                    keyboard=None,
+                    attachment=None,
+                )  # Вставить фотографии
+                buttons = [
+                    "Удалилить из мне нравится",
+                    "Дальше",
+                    "Вернуться в главное меню",
+                ]
+                but_col = self.but_col()
+                keyboard = self.set_key_parameters(
+                    buttons, [but_col[1], but_col[2], but_col[1]]
+                )
+                self.write_msg(user_id, "Выберите действие", keyboard)
+                message, user_id = self.get_message()
+                if message.lower() == "дальше":
+                    the_end()
+                elif message.lower() == "удалилить из мне нравится":
+                    # тут удаляем из БД
+                    self.write_msg(user_id, "Анкета удалена", keyboard=None)
+                    the_end()
+                elif message.lower() == "вернуться в главное меню":
+                    self.start_bot()
 
-    # Кнопки главного меню
+    """Работа с черным списком"""
+
+    def black_list(self, user_id):
+        def the_end():
+            if count >= len(black_list) - 1:
+                buttons = ["Вернуться в главное меню", "Показать черный список"]
+                but_col = self.but_col()
+                keyboard = self.set_key_parameters(buttons, [but_col[1], but_col[0]])
+                self.write_msg(user_id, "Это была последняя анкета", keyboard)
+                message, user_id = self.get_message()
+                if message.lower() == "вернуться в главное меню":
+                    self.start_bot()
+                elif message.lower() == "показать черный список":
+                    black_list(user_id)
+
+        base_data = []  # Тут вставить БД
+        black_list = base_data
+        msg = "Черный список"
+        self.write_msg(user_id, msg, keyboard=None)
+        if black_list == []:
+            msg = "Черный список пуст!"
+            but_col = self.but_col()
+            keyboard = self.set_key_parameters("Вернуться в главное меню", but_col[1])
+            self.write_msg(user_id, msg, keyboard)
+            message, user_id = self.query_bot()
+            if message == "вернуться в главное меню":
+                self.start_bot()
+        elif black_list != []:
+            for count, user in enumerate(black_list):
+                self.write_msg(
+                    user_id,
+                    f"{user.first_name}, {user.last_name}, 'Ссылка',",
+                    keyboard=None,
+                    attachment=None,
+                )  # Вставить фотографии
+                buttons = [
+                    "Удалилить из черного списка",
+                    "Дальше",
+                    "Вернуться в главное меню",
+                ]
+                but_col = self.but_col()
+                keyboard = self.set_key_parameters(
+                    buttons, [but_col[1], but_col[2], but_col[1]]
+                )
+                self.write_msg(user_id, "Выберите действие", keyboard)
+                message, user_id = self.get_message()
+                if message.lower() == "дальше":
+                    the_end()
+                elif message.lower() == "удалилить из черного списка":
+                    # тут удаляем из БД
+                    self.write_msg(user_id, "Анкета удалена", keyboard=None)
+                    the_end()
+                elif message.lower() == "вернуться в главное меню":
+                    self.start_bot()
+
     """Кнопки в приветствии бота, главное меню"""
 
     def greetings_bot(self):
@@ -183,35 +276,6 @@ class VkBot:
 
     def start_bot(self):
         self.show_main_menu()
-
-    """Вывести список мне нравится"""
-
-    def like_search(self, user_id):
-        result = self.like_list()
-        if result == []:
-            msg = "Список понравившихся пуст"
-            but_col = self.but_col()
-            keyboard = self.set_key_parameters("Вернуться в главное меню", but_col[1])
-            self.write_msg(user_id, msg, keyboard)
-            message, user_id = self.query_bot()
-            if message == "вернуться в главное меню":
-                self.start_bot()
-                main()
-        else:
-            msg = "Мне нравится"
-            buttons = ["Удалилить из понравившихся", "Вернуться в главное меню"]
-            but_col = self.but_col()
-            keyboard = self.set_key_parameters(buttons, [but_col[1], but_col[0]])
-            self.write_msg(user_id, msg, keyboard=None)
-            for i in result:
-                self.write_msg(user_id, i, keyboard=None)
-            self.write_msg(user_id, "Выберите команду", keyboard)
-            message, user_id = self.query_bot()
-            if message == "вернуться в главное меню":
-                self.start_bot()
-                main()
-            elif message.lower() == "удалилить из понравившихся":
-                pass  # Тут работа с БД
 
     """Вывести черный список"""
 
@@ -325,11 +389,11 @@ def main():
         vk_session.start_bot()
         """Следующий запрос на сообщение боту"""
     elif message.lower() == "избранные":
-        vk_session.favorites_search(user_id)
+        vk_session.favorites_list(user_id)
     elif message.lower() == "мне нравится":
-        vk_session.like_search(user_id)
+        vk_session.like_list(user_id)
     elif message.lower() == "черный список":
-        vk_session.black_search(user_id)
+        vk_session.black_list(user_id)
     elif message.lower() == "начать поиск":
         res = vk_session.start_search(user_id)  # переменная для поиска
     elif message.lower() == "завершить работу с ботом":
