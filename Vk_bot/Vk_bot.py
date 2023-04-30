@@ -298,7 +298,7 @@ def main():
             main()
 
     # Основной цикл
-    vk_session = VkBot(open_a_token("confing.ini"))
+    vk_session = VkBot(open_a_token("config.ini"))
     message, user_id = query_bot()
     get_parametrs = []
     if message.lower() == "1":

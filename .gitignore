@@ -1,3 +1,4 @@
-confing.ini
+config.ini
 venv\*
 .idea\*
+.idea/
