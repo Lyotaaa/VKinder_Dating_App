@@ -69,3 +69,19 @@ def press_favorite(user_id, favorite_id):
 
 def get_favorites(user_id):
     return session.query(Favorites).filter_by(user_id=user_id)
+
+
+# Blocklist
+
+def press_blocklist(user_id, block_id):
+    existing_block = session.query(Blocklist).filter_by(user_id=user_id, block_id=block_id).first()
+    if existing_block:
+        session.delete(existing_block)
+        session.commit()
+    else:
+        session.add(Blocklist(user_id=user_id, block_id=block_id))
+        session.commit()
+
+
+def get_blocklist(user_id):
+    return session.query(Blocklist).filter_by(user_id=user_id)
