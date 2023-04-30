@@ -1,12 +1,7 @@
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 from models import User, Likes, Dislikes, Favorites, Blocklist
-
-DSN = 'postgresql://postgres:6996@localhost:5432/VKinder'
-engine = sqlalchemy.create_engine(DSN)
-
-Session = sessionmaker(bind=engine)
-session = Session()
+from main import get_DSN
 
 
 # User
@@ -27,14 +22,22 @@ def get_user(user_id):
 
 
 # Likes
-def press_like(user_id, like_id):
+def set_like(user_id, like_id):
+    existing_like = session.query(Likes).filter_by(user_id=user_id, like_id=like_id, ).first()
+    if existing_like:
+        pass
+    else:
+        session.add(Likes(user_id=user_id, like_id=like_id))
+        session.commit()
+
+
+def unset_like(user_id, like_id):
     existing_like = session.query(Likes).filter_by(user_id=user_id, like_id=like_id, ).first()
     if existing_like:
         session.delete(existing_like)
         session.commit()
     else:
-        session.add(Likes(user_id=user_id, like_id=like_id))
-        session.commit()
+        pass
 
 
 def get_likes(user_id):
@@ -42,14 +45,22 @@ def get_likes(user_id):
 
 
 # Dislikes
-def press_dislike(user_id, dislike_id):
+def set_dislike(user_id, dislike_id):
+    existing_dislike = session.query(Dislikes).filter_by(user_id=user_id, dislike_id=dislike_id).first()
+    if existing_dislike:
+        pass
+    else:
+        session.add(Dislikes(user_id=user_id, dislike_id=dislike_id))
+        session.commit()
+
+
+def unset_dislike(user_id, dislike_id):
     existing_dislike = session.query(Dislikes).filter_by(user_id=user_id, dislike_id=dislike_id).first()
     if existing_dislike:
         session.delete(existing_dislike)
         session.commit()
     else:
-        session.add(Dislikes(user_id=user_id, dislike_id=dislike_id))
-        session.commit()
+        pass
 
 
 def get_dislikes(user_id):
@@ -73,15 +84,31 @@ def get_favorites(user_id):
 
 # Blocklist
 
-def press_blocklist(user_id, block_id):
+def set_blocklist(user_id, block_id):
     existing_block = session.query(Blocklist).filter_by(user_id=user_id, block_id=block_id).first()
     if existing_block:
-        session.delete(existing_block)
-        session.commit()
+        pass
     else:
         session.add(Blocklist(user_id=user_id, block_id=block_id))
         session.commit()
 
 
+def unset_blocklist(user_id, block_id):
+    existing_block = session.query(Blocklist).filter_by(user_id=user_id, block_id=block_id).first()
+    if existing_block:
+        session.delete(existing_block)
+        session.commit()
+    else:
+        pass
+
+
 def get_blocklist(user_id):
     return session.query(Blocklist).filter_by(user_id=user_id)
+
+
+if __name__ == '__main__':
+    DSN = get_DSN('config.ini')
+    engine = sqlalchemy.create_engine(DSN)
+
+    Session = sessionmaker(bind=engine)
+    session = Session()
