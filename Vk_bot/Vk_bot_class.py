@@ -8,10 +8,10 @@ import time
 
 
 def open_a_token(file_name):
-    """Открытие токана для бота"""
-    cofing = ConfigParser()
-    cofing.read(file_name)
-    group_token = cofing["Vk_info"]["group_token"]
+    """Открытие токина для бота"""
+    config = ConfigParser()
+    config.read(file_name)
+    group_token = config["Vk_info"]["group_token"]
     return group_token
 
 
