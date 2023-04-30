@@ -319,7 +319,7 @@ class VkBot:
                 if message.lower() == "вернуться в главное меню":
                     self.start_bot()
 
-        result_requests_vkontakte = []  # Тут вставить, что возращает Вк после обработки, список либо словарь.
+        result_requests_vkontakte = [1, 2]  # Тут вставить, что возращает Вк после обработки, список либо словарь.
         if result_requests_vkontakte == []:
             msg = "По вашему запросу анкет нет, измените параметры запроса!"
             but_col = self.but_col()
@@ -340,13 +340,15 @@ class VkBot:
                     "Добавить в избранное",
                     "Добавить в мне нравится",
                     "Добавить в черный список",
-                    "Дальше",
+                    "Добавить в не нравится",
                     "Вернуться в главное меню",
+                    "Дальше",
+                    
                 ]
                 but_col = self.but_col()
                 keyboard = self.set_key_parameters(
                     buttons,
-                    [but_col[2], but_col[2], but_col[2], but_col[0], but_col[0]],
+                    [but_col[0], but_col[0], but_col[2], but_col[2], but_col[1], but_col[3]],
                 )
                 self.write_msg(user_id, "Выберите действие", keyboard)
                 message, user_id = self.get_message()
@@ -356,6 +358,8 @@ class VkBot:
                     """Тут вставить функцию БД на добавление в мне нравится, информации храниться в info_user"""
                 elif message.lower() == "добавить в черный список":
                     """Тут вставить функцию БД на добавление в черный список, информации храниться в info_user"""
+                elif message.lower() == "добавить в не нравится":
+                    """Тут вставить функцию БД на добавление в мне нравится, информации храниться в info_user"""
                 elif message.lower() == "дальше":
                     the_end(user_id)
                 elif message.lower() == "вернуться в главное меню":
@@ -380,8 +384,6 @@ class VkBot:
                     self.get_parametrs["city"] = message
                     msg = "Данные записаны, начинаем поиск!"
                     self.write_msg(user_id, msg, keyboard=None)
-                    # time.sleep(3)
-                    # self.add_to_list(user_id)
             elif int(message) < 18:
                 msg = "Аккуратно! Статься 134 УК РФ!"
                 self.write_msg(user_id, msg, keyboard=None)
