@@ -277,35 +277,6 @@ class VkBot:
     def start_bot(self):
         self.show_main_menu()
 
-    """Вывести черный список"""
-
-    def black_search(self, user_id):
-        result = self.black_list()
-        if result == []:
-            msg = "Черный список пуст"
-            but_col = self.but_col()
-            keyboard = self.set_key_parameters("Вернуться в главное меню", but_col[1])
-            self.write_msg(user_id, msg, keyboard)
-            message, user_id = self.query_bot()
-            if message == "вернуться в главное меню":
-                self.start_bot()
-                main()
-        else:
-            msg = "Черный список"
-            buttons = ["Удалилить из черного списка", "Вернуться в главное меню"]
-            but_col = self.but_col()
-            keyboard = self.set_key_parameters(buttons, [but_col[1], but_col[0]])
-            self.write_msg(user_id, msg, keyboard=None)
-            for i in result:
-                self.write_msg(user_id, i, keyboard=None)
-            self.write_msg(user_id, "Выберите команду", keyboard)
-            message, user_id = self.query_bot()
-            if message == "вернуться в главное меню":
-                self.start_bot()
-                main()
-            elif message.lower() == "удалилить из черного списка":
-                pass  # Тут работа с БД
-
     """Показ сообщения "Напишите возраст" и Возрат к выбору пола"""
 
     def back_to_gender(self, user_id):
