@@ -1,12 +1,7 @@
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 from models import User, Likes, Dislikes, Favorites, Blocklist
-
-DSN = 'postgresql://postgres:6996@localhost:5432/VKinder'
-engine = sqlalchemy.create_engine(DSN)
-
-Session = sessionmaker(bind=engine)
-session = Session()
+from main import get_DSN
 
 
 # User
@@ -109,3 +104,11 @@ def unset_blocklist(user_id, block_id):
 
 def get_blocklist(user_id):
     return session.query(Blocklist).filter_by(user_id=user_id)
+
+
+if __name__ == '__main__':
+    DSN = get_DSN('config.ini')
+    engine = sqlalchemy.create_engine(DSN)
+
+    Session = sessionmaker(bind=engine)
+    session = Session()

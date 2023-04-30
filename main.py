@@ -11,5 +11,6 @@ def get_DSN(file_name):
 
 if __name__ == '__main__':
     DSN = get_DSN('config.ini')
+
     engine = sqlalchemy.create_engine(DSN)
     create_tables(engine)
