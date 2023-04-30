@@ -319,7 +319,10 @@ class VkBot:
                 if message.lower() == "вернуться в главное меню":
                     self.start_bot()
 
-        result_requests_vkontakte = [1, 2]  # Тут вставить, что возращает Вк после обработки, список либо словарь.
+        result_requests_vkontakte = [
+            1,
+            2,
+        ]  # Тут вставить, что возращает Вк после обработки, список либо словарь.
         if result_requests_vkontakte == []:
             msg = "По вашему запросу анкет нет, измените параметры запроса!"
             but_col = self.but_col()
@@ -343,12 +346,18 @@ class VkBot:
                     "Добавить в не нравится",
                     "Вернуться в главное меню",
                     "Дальше",
-                    
                 ]
                 but_col = self.but_col()
                 keyboard = self.set_key_parameters(
                     buttons,
-                    [but_col[0], but_col[0], but_col[2], but_col[2], but_col[1], but_col[3]],
+                    [
+                        but_col[0],
+                        but_col[0],
+                        but_col[2],
+                        but_col[2],
+                        but_col[1],
+                        but_col[3],
+                    ],
                 )
                 self.write_msg(user_id, "Выберите действие", keyboard)
                 message, user_id = self.get_message()
