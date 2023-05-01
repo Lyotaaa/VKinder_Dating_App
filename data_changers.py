@@ -1,3 +1,5 @@
+
+from configparser import ConfigParser
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 from models import User, Likes, Dislikes, Favorites, Blocklist
@@ -8,6 +10,17 @@ engine = sqlalchemy.create_engine(DSN)
 Session = sessionmaker(bind=engine)
 session = Session()
 
+def open_session(dsn: str):
+    """
+    Открывает соединение с БД
+    """
+    config = ConfigParser()
+    config.read("config.ini")
+    DSN = config["Vk_info"]["DB_connect"]
+
+    engine = sqlalchemy.create_engine(dsn)
+    Session = sessionmaker(bind=engine)
+    return Session()
 
 # User
 def update_user(user_id, age_range, gender, city):
@@ -37,8 +50,9 @@ def press_like(user_id, like_id):
         session.commit()
 
 
-def get_likes(user_id):
-    return session.query(Likes).filter_by(user_id=user_id)
+def get_likes(session, user_id):
+    q = session.query(Likes).filter_by(user_id=str(user_id))
+    return [r[1] for r in q.all()]
 
 
 # Dislikes
@@ -52,8 +66,9 @@ def press_dislike(user_id, dislike_id):
         session.commit()
 
 
-def get_dislikes(user_id):
-    return session.query(Dislikes).filter_by(user_id=user_id)
+def get_dislikes(session, user_id):
+    q = session.query(Dislikes).filter_by(user_id=str(user_id))
+    return [r[1] for r in q.all()]
 
 
 # Favorites
@@ -67,8 +82,9 @@ def press_favorite(user_id, favorite_id):
         session.commit()
 
 
-def get_favorites(user_id):
-    return session.query(Favorites).filter_by(user_id=user_id)
+def get_favorites(session, user_id):
+    q = session.query(Favorites).filter_by(user_id=str(user_id))
+    return [r[1] for r in q.all()]
 
 
 # Blocklist
