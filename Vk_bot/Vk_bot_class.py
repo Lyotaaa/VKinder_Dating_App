@@ -126,6 +126,7 @@ class VkBot:
 
     def query_bot(self):
         message, self.user_id = self.get_message()
+        data_changers.update_user(self.__session, self.user_id, 0, 0, "")
         return message, self.user_id
 
     """Показать гавлное меню"""
@@ -190,6 +191,7 @@ class VkBot:
                     the_end(user_id)
                 elif message.lower() == "удалилить из избранного":
                     # тут удаляем из БД
+                    data_changers.press_favorite(self.__session, user_id, user)
                     self.write_msg(user_id, "Анкета удалена", keyboard=None)
                     the_end(user_id)
                 elif message.lower() == "вернуться в главное меню":
@@ -246,6 +248,7 @@ class VkBot:
                     the_end(user_id)
                 elif message.lower() == "удалилить из мне нравится":
                     # тут удаляем из БД
+                    data_changers.unset_like(self.__session, user_id, user)
                     self.write_msg(user_id, "Анкета удалена", keyboard=None)
                     the_end(user_id)
                 elif message.lower() == "вернуться в главное меню":
@@ -268,7 +271,7 @@ class VkBot:
                     self.show_black_list(user_id)
 
         # base_data = [1, 2]  # Тут вставить БД
-        black_list = data_changers.get_dislikes(self.__session, user_id)
+        black_list = data_changers.get_blocklist(self.__session, user_id)
         msg = "Черный список"
         self.write_msg(user_id, msg, keyboard=None)
         if black_list == []:
@@ -302,6 +305,7 @@ class VkBot:
                     the_end(user_id)
                 elif message.lower() == "удалилить из черного списка":
                     # тут удаляем из БД
+                    data_changers.unset_blocklist(self.__session, user_id, user)
                     self.write_msg(user_id, "Анкета удалена", keyboard=None)
                     the_end(user_id)
                 elif message.lower() == "вернуться в главное меню":

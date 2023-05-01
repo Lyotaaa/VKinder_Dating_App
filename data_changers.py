@@ -18,20 +18,21 @@ def open_session(dsn: str):
     return Session()
 
 # User
-def update_user(user_id, age_range, gender, city):
-    existing_user = session.query(User).filter_by(user_id=user_id).first()
+def update_user(session, user_id, age_range, gender, city):
+    existing_user = session.query(User).filter_by(user_id=str(user_id)).first()
     if existing_user:
-        existing_user.age_range = age_range
-        existing_user.gender = gender
+        existing_user.age_range = str(age_range)
+        existing_user.gender = True if gender == 1 else False
         existing_user.city = city
         session.commit()
     else:
-        session.add(User(user_id=user_id, age_range=age_range, gender=gender, city=city))
+        session.add(User(user_id=str(user_id), age_range=str(age_range),
+                         gender=(True if gender == 1 else False), city=city))
         session.commit()
 
 
 def get_user(user_id):
-    return session.query(User).filter_by(user_id=user_id).first()
+    return session.query(User).filter_by(user_id=str(user_id)).first()
 
 
 # Likes
@@ -45,7 +46,7 @@ def set_like(session, user_id, like_id):
 
 
 def unset_like(session, user_id, like_id):
-    existing_like = session.query(Likes).filter_by(user_id=str(user_id), like_id=like_id, ).first()
+    existing_like = session.query(Likes).filter_by(user_id=str(user_id), like_id=str(like_id), ).first()
     if existing_like:
         session.delete(existing_like)
         session.commit()
@@ -55,7 +56,7 @@ def unset_like(session, user_id, like_id):
 
 def get_likes(session, user_id):
     q = session.query(Likes).filter_by(user_id=str(user_id))
-    return [r[1] for r in q.all()]
+    return [r.like_id for r in q.all()]
 
 
 # Dislikes
@@ -69,7 +70,7 @@ def set_dislike(session, user_id, dislike_id):
 
 
 def unset_dislike(session, user_id, dislike_id):
-    existing_dislike = session.query(Dislikes).filter_by(user_id=str(user_id), dislike_id=dislike_id).first()
+    existing_dislike = session.query(Dislikes).filter_by(user_id=str(user_id), dislike_id=str(dislike_id)).first()
     if existing_dislike:
         session.delete(existing_dislike)
         session.commit()
@@ -79,7 +80,7 @@ def unset_dislike(session, user_id, dislike_id):
 
 def get_dislikes(session, user_id):
     q = session.query(Dislikes).filter_by(user_id=str(user_id))
-    return [r[1] for r in q.all()]
+    return [r.dislike_id for r in q.all()]
 
 
 # Favorites
@@ -95,7 +96,7 @@ def press_favorite(session, user_id, favorite_id):
 
 def get_favorites(session, user_id):
     q = session.query(Favorites).filter_by(user_id=str(user_id))
-    return [r[1] for r in q.all()]
+    return [r.favorite_id for r in q.all()]
 
 
 # Blocklist
@@ -110,7 +111,7 @@ def set_blocklist(session, user_id, block_id):
 
 
 def unset_blocklist(session, user_id, block_id):
-    existing_block = session.query(Blocklist).filter_by(user_id=str(user_id), block_id=block_id).first()
+    existing_block = session.query(Blocklist).filter_by(user_id=str(user_id), block_id=str(block_id)).first()
     if existing_block:
         session.delete(existing_block)
         session.commit()
@@ -118,8 +119,9 @@ def unset_blocklist(session, user_id, block_id):
         pass
 
 
-def get_blocklist(user_id):
-    return session.query(Blocklist).filter_by(user_id=str(user_id))
+def get_blocklist(session, user_id):
+    q = session.query(Blocklist).filter_by(user_id=str(user_id))
+    return [r.block_id for r in q.all()]
 
 
 if __name__ == '__main__':
