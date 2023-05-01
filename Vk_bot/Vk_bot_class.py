@@ -5,6 +5,7 @@ from configparser import ConfigParser
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 import sys
 import time
+import data_changers
 
 """Открытие токина для бота"""
 
@@ -15,18 +16,23 @@ def open_a_token(file_name):
     group_token = config["Vk_info"]["group_token"]
     return group_token
 
+def get_db(file_name):
+    """
+    Берёт строчку для коннекта с БД
+    """
+    config = ConfigParser()
+    config.read(file_name)
+    dsn = config["Vk_info"]["DB_connect"]
+    return dsn
 
 class VkBot:
 
-    """Подключение к боту"""
-
-    def __init__(self, open_a_token):
-        self.vk_session = vk_api.VkApi(token=open_a_token)
+    def __init__(self, file_name):
+        """Подключение к боту"""
+        self.vk_session = vk_api.VkApi(token=open_a_token(file_name))
         self.vk_api = self.vk_session.get_api()
         self.long_pool = VkLongPoll(self.vk_session)
-        self.get_parametrs = {}
-
-    """Сообщение от бота: кому, сообщение, id собщения, кнопки, картинки"""
+        self.__session = data_changers.open_session(get_db(file_name))
 
     def write_msg(self, user_id, message, keyboard=None, attachment=None):
         post = {
@@ -135,8 +141,8 @@ class VkBot:
                 elif message.lower() == "вывести избранных":
                     self.show_favorites_list(user_id)
 
-        base_data = [1, 2]  # Тут вставить БД
-        favorites_list = base_data
+        # base_data = [1, 2]  # Тут вставить БД
+        favorites_list = data_changers.get_favorites(self.__session, user_id)
         msg = "Избранные"
         self.write_msg(user_id, msg, keyboard=None)
         if favorites_list == []:
@@ -191,8 +197,8 @@ class VkBot:
                 elif message.lower() == "показать мне нравится":
                     self.show_like_list(user_id)
 
-        base_data = [1, 2]  # Тут вставить БД
-        like_list = base_data
+        # base_data = [1, 2]  # Тут вставить БД
+        like_list = data_changers.get_likes(self.__session, user_id)
         msg = "Мне нравится"
         self.write_msg(user_id, msg, keyboard=None)
         if like_list == []:
@@ -247,8 +253,8 @@ class VkBot:
                 elif message.lower() == "показать черный список":
                     self.show_black_list(user_id)
 
-        base_data = [1, 2]  # Тут вставить БД
-        black_list = base_data
+        # base_data = [1, 2]  # Тут вставить БД
+        black_list = data_changers.get_dislikes(self.__session, user_id)
         msg = "Черный список"
         self.write_msg(user_id, msg, keyboard=None)
         if black_list == []:
@@ -432,9 +438,9 @@ class VkBot:
 
 def main():
     # Основной цикл
-    vk_session = VkBot(open_a_token("config.ini"))
+    vk_session = VkBot("config.ini")
     message, user_id = vk_session.query_bot()
-    if message.lower() == "1":
+    if message.lower() == "1" or message.lower() in {"старт", "start", "привет", "hi"}:
         """Показывает главное меню"""
         vk_session.start_bot()
         """Следующий запрос на сообщение боту"""

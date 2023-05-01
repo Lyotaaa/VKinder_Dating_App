@@ -3,3 +3,4 @@ venv\*
 .idea\*
 .idea/
 __pycache__/
+vk_token.txt
