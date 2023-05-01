@@ -37,31 +37,18 @@ def get_user(user_id):
 
 
 # Likes
-def set_like(user_id, like_id):
-    existing_like = (
-        session.query(Likes)
-        .filter_by(
-            user_id=user_id,
-            like_id=like_id,
-        )
-        .first()
-    )
+
+def set_like(session, user_id, like_id):
+    existing_like = session.query(Likes).filter_by(user_id=str(user_id), like_id=str(like_id), ).first()
     if existing_like:
         pass
     else:
-        session.add(Likes(user_id=user_id, like_id=like_id))
+        session.add(Likes(user_id=str(user_id), like_id=str(like_id)))
         session.commit()
 
 
-def unset_like(user_id, like_id):
-    existing_like = (
-        session.query(Likes)
-        .filter_by(
-            user_id=user_id,
-            like_id=like_id,
-        )
-        .first()
-    )
+def unset_like(session, user_id, like_id):
+    existing_like = session.query(Likes).filter_by(user_id=str(user_id), like_id=like_id, ).first()
     if existing_like:
         session.delete(existing_like)
         session.commit()
@@ -75,25 +62,18 @@ def get_likes(session, user_id):
 
 
 # Dislikes
-def set_dislike(user_id, dislike_id):
-    existing_dislike = (
-        session.query(Dislikes)
-        .filter_by(user_id=user_id, dislike_id=dislike_id)
-        .first()
-    )
+
+def set_dislike(session, user_id, dislike_id):
+    existing_dislike = session.query(Dislikes).filter_by(user_id=str(user_id), dislike_id=str(dislike_id)).first()
     if existing_dislike:
         pass
     else:
-        session.add(Dislikes(user_id=user_id, dislike_id=dislike_id))
+        session.add(Dislikes(user_id=str(user_id), dislike_id=str(dislike_id)))
         session.commit()
 
 
-def unset_dislike(user_id, dislike_id):
-    existing_dislike = (
-        session.query(Dislikes)
-        .filter_by(user_id=user_id, dislike_id=dislike_id)
-        .first()
-    )
+def unset_dislike(session, user_id, dislike_id):
+    existing_dislike = session.query(Dislikes).filter_by(user_id=str(user_id), dislike_id=dislike_id).first()
     if existing_dislike:
         session.delete(existing_dislike)
         session.commit()
@@ -107,23 +87,23 @@ def get_dislikes(session, user_id):
 
 
 # Favorites
-def set_favorite(user_id, favorite_id):
+def set_favorite(session, user_id, favorite_id):
     existing_favorite = (
         session.query(Favorites)
-        .filter_by(user_id=user_id, favorite_id=favorite_id)
+        .filter_by(user_id=str(user_id), favorite_id=str(favorite_id))
         .first()
     )
     if existing_favorite:
         pass
     else:
-        session.add(Favorites(user_id=user_id, favorite_id=favorite_id))
+        session.add(Favorites(user_id=str(user_id), favorite_id=str(favorite_id)))
         session.commit()
 
 
-def unset_favorite(user_id, favorite_id):
+def unset_favorite(session, user_id, favorite_id):
     existing_favorite = (
         session.query(Favorites)
-        .filter_by(user_id=user_id, favorite_id=favorite_id)
+        .filter_by(user_id=str(user_id), favorite_id=str(favorite_id))
         .first()
     )
     if existing_favorite:
@@ -139,20 +119,20 @@ def get_favorites(session, user_id):
 
 
 # Blocklist
-def set_blocklist(user_id, block_id):
+def set_blocklist(session, user_id, block_id):
     existing_block = (
-        session.query(Blocklist).filter_by(user_id=user_id, block_id=block_id).first()
+        session.query(Blocklist).filter_by(user_id=str(user_id), block_id=str(block_id)).first()
     )
     if existing_block:
         pass
     else:
-        session.add(Blocklist(user_id=user_id, block_id=block_id))
+        session.add(Blocklist(user_id=str(user_id), block_id=str(block_id)))
         session.commit()
 
 
-def unset_blocklist(user_id, block_id):
+def unset_blocklist(session, user_id, block_id):
     existing_block = (
-        session.query(Blocklist).filter_by(user_id=user_id, block_id=block_id).first()
+        session.query(Blocklist).filter_by(user_id=str(user_id), block_id=block_id).first()
     )
     if existing_block:
         session.delete(existing_block)
@@ -161,8 +141,8 @@ def unset_blocklist(user_id, block_id):
         pass
 
 
-def get_blocklist(user_id):
-    return session.query(Blocklist).filter_by(user_id=user_id)
+def get_blocklist(session, user_id):
+    return session.query(Blocklist).filter_by(user_id=str(user_id))
 
 
 # DSN
