@@ -126,6 +126,7 @@ class VkBot:
 
     def query_bot(self):
         message, self.user_id = self.get_message()
+        data_changers.update_user(self.__session, self.user_id, 0, 0, "")
         return message, self.user_id
 
     """Показать гавлное меню"""
@@ -190,6 +191,7 @@ class VkBot:
                     the_end(user_id)
                 elif message.lower() == "удалилить из избранного":
                     # тут удаляем из БД
+                    data_changers.press_favorite(self.__session, user_id, user)
                     self.write_msg(user_id, "Анкета удалена", keyboard=None)
                     the_end(user_id)
                 elif message.lower() == "вернуться в главное меню":
@@ -246,6 +248,7 @@ class VkBot:
                     the_end(user_id)
                 elif message.lower() == "удалилить из мне нравится":
                     # тут удаляем из БД
+                    data_changers.unset_like(self.__session, user_id, user)
                     self.write_msg(user_id, "Анкета удалена", keyboard=None)
                     the_end(user_id)
                 elif message.lower() == "вернуться в главное меню":
@@ -268,7 +271,7 @@ class VkBot:
                     self.show_black_list(user_id)
 
         # base_data = [1, 2]  # Тут вставить БД
-        black_list = data_changers.get_dislikes(self.__session, user_id)
+        black_list = data_changers.get_blocklist(self.__session, user_id)
         msg = "Черный список"
         self.write_msg(user_id, msg, keyboard=None)
         if black_list == []:
@@ -302,6 +305,7 @@ class VkBot:
                     the_end(user_id)
                 elif message.lower() == "удалилить из черного списка":
                     # тут удаляем из БД
+                    data_changers.unset_blocklist(self.__session, user_id, user)
                     self.write_msg(user_id, "Анкета удалена", keyboard=None)
                     the_end(user_id)
                 elif message.lower() == "вернуться в главное меню":
@@ -383,12 +387,16 @@ class VkBot:
                 message, user_id = self.get_message()
                 if message.lower() == "добавить в избранное":
                     """Тут вставить функцию БД на добавление в избранное, информации храниться в info_user"""
+                    data_changers.press_favorite(self.__session, user_id, self.get_parametrs["id"])
                 elif message.lower() == "добавить в мне нравится":
                     """Тут вставить функцию БД на добавление в мне нравится, информации храниться в info_user"""
+                    data_changers.set_like(self.__session, user_id, self.get_parametrs["id"])
                 elif message.lower() == "добавить в черный список":
                     """Тут вставить функцию БД на добавление в черный список, информации храниться в info_user"""
+                    data_changers.set_blocklist(self.__session, user_id, self.get_parametrs["id"])
                 elif message.lower() == "добавить в не нравится":
                     """Тут вставить функцию БД на добавление в мне нравится, информации храниться в info_user"""
+                    data_changers.set_dislike(self.__session, user_id, self.get_parametrs["id"])
                 elif message.lower() == "дальше":
                     the_end(user_id)
                 elif message.lower() == "вернуться в главное меню":
@@ -414,9 +422,12 @@ class VkBot:
                     msg = "Данные записаны, начинаем поиск!"
                     self.write_msg(user_id, msg, keyboard=None)
 
-                    usr = self.__vk.search_user_by_params(1, 30, "Москва") # здесь не понял, откуда брать параметры поиска
+                    usr = self.__vk.search_user_by_params(self.get_parametrs["sex"],
+                                                          self.get_parametrs["age"], self.get_parametrs["city"])
                     msg = str(usr)
                     self.write_msg(user_id, msg, keyboard=None)
+                    if usr:
+                        self.get_parametrs["id"] = usr.id
 
             elif int(message) < 18:
                 msg = "Аккуратно! Статься 134 УК РФ!"
