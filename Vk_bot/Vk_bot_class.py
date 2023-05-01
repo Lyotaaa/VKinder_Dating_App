@@ -445,7 +445,10 @@ def main():
         vk_session.show_black_list(user_id)
     elif message.lower() == "начать поиск":
         vk_session.start_search(user_id)
-        vk_session.get_parametrs  # Для поиска по Вконтакте
+        res = vk_session.get_parametrs  # Для поиска по Вконтакте
+        if res:
+            time.sleep(3)
+            vk_session.add_to_list(user_id)
     elif message.lower() == "завершить работу с ботом":
         msg = "До свидания"
         vk_session.write_msg(user_id, msg, keyboard=None)
