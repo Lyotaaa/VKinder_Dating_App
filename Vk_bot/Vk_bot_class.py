@@ -6,7 +6,7 @@ from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 import sys
 import time
 import data_changers
-
+from vk.vk import VKConnector, VKUser
 
 def open_a_token(file_name):
     """Открытие токина для бота"""
@@ -24,6 +24,13 @@ def get_db(file_name):
     dsn = config["Vk_info"]["DB_connect"]
     return dsn
 
+def open_user_token(file_name):
+    """Открытие токина для бота"""
+    config = ConfigParser()
+    config.read(file_name)
+    user_token = config["Vk_info"]["user_token"]
+    return user_token
+
 class VkBot:
     def __init__(self, file_name):
         """Подключение к боту"""
@@ -31,6 +38,7 @@ class VkBot:
         self.vk_api = self.vk_session.get_api()
         self.long_pool = VkLongPoll(self.vk_session)
         self.__session = data_changers.open_session(get_db(file_name))
+        self.__vk = VKConnector(open_user_token(file_name))
 
     def write_msg(self, user_id, message, keyboard=None, attachment=None):
         """Сообщение от бота: кому, сообщение, id собщения, кнопки, картинки"""
@@ -326,6 +334,12 @@ class VkBot:
                     get_parametrs["city"] = message
                     msg = "Данные записаны, начинаем поиск!"
                     self.write_msg(user_id, msg, keyboard=None)
+
+                    usr = self.__vk.search_user_by_params(1, 30, "Москва") # здесь не понял, откуда брать параметры поиска
+                    msg = str(usr)
+                    self.write_msg(user_id, msg, keyboard=None)
+
+
             elif int(message) < 18:
                 msg = "Аккуратно! Статься 134 УК РФ!"
                 self.write_msg(user_id, msg, keyboard=None)

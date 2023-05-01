@@ -78,15 +78,15 @@ class VKConnector:
     """
     Класс для работы с VK
     """
-    def __init__(self):
-        with open(VK_TOKEN_FILENAME, "r", encoding="utf-8") as inf:
-            token = inf.readline()
-            if token == None or token == "":
-                raise VKException(f'Не возможно считать токен из файла "{VK_TOKEN_FILENAME}"')
-            self.token = token
-            self.version = '5.89'
-            self.params = {'access_token': self.token, 'v': self.version}
-            self.__searches = {}
+    def __init__(self, token):
+        # with open(VK_TOKEN_FILENAME, "r", encoding="utf-8") as inf:
+            # token = inf.readline()
+            # if token == None or token == "":
+            #     raise VKException(f'Не возможно считать токен из файла "{VK_TOKEN_FILENAME}"')
+        self.token = token
+        self.version = '5.89'
+        self.params = {'access_token': self.token, 'v': self.version}
+        self.__searches = {}
 
     def get_user_info(self, id: str) -> dict:
         """
