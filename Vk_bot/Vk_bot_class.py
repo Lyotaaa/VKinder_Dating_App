@@ -172,11 +172,13 @@ class VkBot:
                 self.start_bot()
         elif favorites_list != []:
             for count, user in enumerate(favorites_list):
+                info_user = self.__vk.get_user(user)
                 self.write_msg(
                     user_id,
-                    f"{user}",  # Вставить фотографии {user.first_name}, {user.last_name}, 'Ссылка',
+                    f"{info_user.name}, дата рождения {info_user.bdate}, {info_user.city}",
                     keyboard=None,
-                    attachment=None,
+                    attachment=f'photo{info_user.photos[0]["owner_id"]}_{info_user.photos[0]["id"]}' if \
+                        len(info_user.photos) > 0 else None
                 )
                 buttons = [
                     "Удалилить из избранного",
@@ -229,11 +231,13 @@ class VkBot:
                 self.start_bot()
         elif like_list != []:
             for count, user in enumerate(like_list):
+                info_user = self.__vk.get_user(user)
                 self.write_msg(
                     user_id,
-                    f"{user}",  # Вставить фотографии {user.first_name}, {user.last_name}, 'Ссылка'
+                    f"{info_user.name}, дата рождения {info_user.bdate}, {info_user.city}",
                     keyboard=None,
-                    attachment=None,
+                    attachment=f'photo{info_user.photos[0]["owner_id"]}_{info_user.photos[0]["id"]}' if \
+                        len(info_user.photos) > 0 else None
                 )
                 buttons = [
                     "Удалилить из мне нравится",
@@ -286,11 +290,13 @@ class VkBot:
                 self.start_bot()
         elif black_list != []:
             for count, user in enumerate(black_list):
+                info_user = self.__vk.get_user(user)
                 self.write_msg(
                     user_id,
-                    f"{user}",  # Вставить фотографии {user.first_name}, {user.last_name}, 'Ссылка',
+                    f"{info_user.name}, дата рождения {info_user.bdate}, {info_user.city}",
                     keyboard=None,
-                    attachment=None,
+                    attachment=f'photo{info_user.photos[0]["owner_id"]}_{info_user.photos[0]["id"]}' if \
+                        len(info_user.photos) > 0 else None
                 )
                 buttons = [
                     "Удалилить из черного списка",
@@ -367,7 +373,8 @@ class VkBot:
                     user_id,
                     f"{info_user.name}, дата рождения {info_user.bdate}, {info_user.city}",
                     keyboard=None,
-                    attachment=None,
+                    attachment=f'photo{info_user.photos[0]["owner_id"]}_{info_user.photos[0]["id"]}' if \
+                        len(info_user.photos) > 0 else None
                 )
                 buttons = [
                     "Добавить в избранное",
