@@ -131,6 +131,11 @@ def unset_favorite(session, user_id, favorite_id):
         .filter_by(user_id=str(user_id), favorite_id=str(favorite_id))
         .first()
     )
+    if existing_favorite:
+        session.delete(existing_favorite)
+        session.commit()
+    else:
+        pass
 
 
 def press_favorite(session, user_id, favorite_id):
