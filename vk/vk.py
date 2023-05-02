@@ -96,7 +96,7 @@ class VKConnector:
         url = 'https://api.vk.com/method/users.get'
         params = {
             'user_ids': id,
-            "fields":"education,sex,bdate,city"
+            "fields":"education,sex,bdate,city,photo_max_orig"
         }
         response = requests.get(url, params={**self.params, **params})
         if response.status_code != 200:
@@ -113,7 +113,7 @@ class VKConnector:
         return VKUser(ud["response"][0]["id"],
                       ud["response"][0]["first_name"] + ' ' + ud["response"][0]["last_name"],
                       ud["response"][0]["bdate"], ud["response"][0]["sex"],
-                      ud["response"][0]["city"]["title"], photos)
+                      ud["response"][0]["city"]["title"], ud["response"][0]["photo_max_orig"], photos)
 
     def _is_img_type_better(self, type1, type2):
         """
@@ -157,7 +157,8 @@ class VKConnector:
                     size = int(s["height"]) + int(s["width"])
                     url = s["url"]
                     img_type = s["type"]
-            ret.append({"likes": ph["likes"]["count"], "date": ph["date"], "url": url, "type": img_type})
+            ret.append({ "id": ph["id"], "owner_id": ph["owner_id"], "likes": ph["likes"]["count"],
+                         "date": ph["date"], "url": url, "type": img_type})
         return ret
 
     def search_users(self, sex: int, age: int, city: str) -> list:
