@@ -34,7 +34,7 @@
 
 Код разбит на модули: **vk**, **DB**, **Vk_bot**
 
-В модуле **vk** находятся классы для работы с API ВКонтакте.
+В модуле **vk** находятся классы для работы с API ВКонтакте. Работа с API происходит через библиотеку **requests**.
 
 - класс [VKUser](https://github.com/LeaveThePast/VKinder_Dating_App/blob/67d435487ccd651ec43fce98b729647d05acd8c8/vk/vk.py#L13), служащий для инкапсуляции данных о пользователе ВКонтакте.
 - класс [VKConnector](https://github.com/LeaveThePast/VKinder_Dating_App/blob/67d435487ccd651ec43fce98b729647d05acd8c8/vk/vk.py#L77), в котором реализована работа с API ВКонтакте.
@@ -46,7 +46,7 @@
 
 Сделаны таблицы для учёта пользователей, пользовавшихся сервисом, для учёта пользователей добавленых в "Избранное", "Чёрный список" итд.
 
-В модуле **Vk_bot** реализована логика работы бота. Для этого создан класс [VkBot](https://github.com/LeaveThePast/VKinder_Dating_App/blob/67d435487ccd651ec43fce98b729647d05acd8c8/Vk_bot/Vk_bot_class.py#L39).
+В модуле **Vk_bot** реализована логика работы бота. Для этого создан класс [VkBot](https://github.com/LeaveThePast/VKinder_Dating_App/blob/67d435487ccd651ec43fce98b729647d05acd8c8/Vk_bot/Vk_bot_class.py#L39). Используется библиотека **vk_api**.
 
 В некоторых классах реализованы методы **\_\_str\_\_**
 
