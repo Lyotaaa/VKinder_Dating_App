@@ -22,7 +22,7 @@ def update_user(session, user_id, age_range, gender, city):
     existing_user = session.query(User).filter_by(user_id=str(user_id)).first()
     if existing_user:
         existing_user.age_range = str(age_range)
-        existing_user.gender = True if gender == 1 else False
+        existing_user.gender = gender
         existing_user.city = city
         session.commit()
     else:
@@ -30,7 +30,7 @@ def update_user(session, user_id, age_range, gender, city):
             User(
                 user_id=str(user_id),
                 age_range=str(age_range),
-                gender=(True if gender == 1 else False),
+                gender=gender,
                 city=city,
             )
         )
