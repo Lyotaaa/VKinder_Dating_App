@@ -5,7 +5,9 @@ from configparser import ConfigParser
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 import sys
 import time
-import data_changers
+from DB.data_changers import open_session, update_user, get_favorites, set_favorite, get_likes, unset_like
+from DB.data_changers import unset_blocklist, set_like, set_blocklist, set_dislike, unset_favorite, get_blocklist
+
 from vk.vk import VKConnector, VKUser
 
 """Открытие токина для бота"""
@@ -38,13 +40,13 @@ class VkBot:
 
     """Подключение к боту"""
 
-    def __init__(self, file_name):
+    def __init__(self, file_name: str, vk: VKConnector):
         self.vk_session = vk_api.VkApi(token=open_a_token(file_name))
         self.vk_api = self.vk_session.get_api()
         self.long_pool = VkLongPoll(self.vk_session)
         self.get_parametrs = {}
-        self.__session = data_changers.open_session(get_db(file_name))
-        self.__vk = VKConnector(open_user_token(file_name))
+        self.__session = open_session(get_db(file_name))
+        self.__vk = vk
 
     """Сообщение от бота: кому, сообщение, id собщения, кнопки, картинки"""
 
@@ -126,7 +128,7 @@ class VkBot:
 
     def query_bot(self):
         message, self.user_id = self.get_message()
-        data_changers.update_user(self.__session, self.user_id, 0, 0, "")
+        update_user(self.__session, self.user_id, 0, 0, "")
         return message, self.user_id
 
     """Показать гавлное меню"""
@@ -157,7 +159,7 @@ class VkBot:
                     self.show_favorites_list(user_id)
 
         # base_data = [1, 2]  # Тут вставить БД
-        favorites_list = data_changers.get_favorites(self.__session, user_id)
+        favorites_list = get_favorites(self.__session, user_id)
         msg = "Избранные"
         self.write_msg(user_id, msg, keyboard=None)
         if favorites_list == []:
@@ -191,7 +193,7 @@ class VkBot:
                     the_end(user_id)
                 elif message.lower() == "удалилить из избранного":
                     # тут удаляем из БД
-                    data_changers.press_favorite(self.__session, user_id, user)
+                    unset_favorite(self.__session, user_id, user)
                     self.write_msg(user_id, "Анкета удалена", keyboard=None)
                     the_end(user_id)
                 elif message.lower() == "вернуться в главное меню":
@@ -214,7 +216,7 @@ class VkBot:
                     self.show_like_list(user_id)
 
         # base_data = [1, 2]  # Тут вставить БД
-        like_list = data_changers.get_likes(self.__session, user_id)
+        like_list = get_likes(self.__session, user_id)
         msg = "Мне нравится"
         self.write_msg(user_id, msg, keyboard=None)
         if like_list == []:
@@ -248,7 +250,7 @@ class VkBot:
                     the_end(user_id)
                 elif message.lower() == "удалилить из мне нравится":
                     # тут удаляем из БД
-                    data_changers.unset_like(self.__session, user_id, user)
+                    unset_like(self.__session, user_id, user)
                     self.write_msg(user_id, "Анкета удалена", keyboard=None)
                     the_end(user_id)
                 elif message.lower() == "вернуться в главное меню":
@@ -271,7 +273,7 @@ class VkBot:
                     self.show_black_list(user_id)
 
         # base_data = [1, 2]  # Тут вставить БД
-        black_list = data_changers.get_blocklist(self.__session, user_id)
+        black_list = get_blocklist(self.__session, user_id)
         msg = "Черный список"
         self.write_msg(user_id, msg, keyboard=None)
         if black_list == []:
@@ -305,7 +307,7 @@ class VkBot:
                     the_end(user_id)
                 elif message.lower() == "удалилить из черного списка":
                     # тут удаляем из БД
-                    data_changers.unset_blocklist(self.__session, user_id, user)
+                    unset_blocklist(self.__session, user_id, user)
                     self.write_msg(user_id, "Анкета удалена", keyboard=None)
                     the_end(user_id)
                 elif message.lower() == "вернуться в главное меню":
@@ -343,10 +345,13 @@ class VkBot:
                 if message.lower() == "вернуться в главное меню":
                     self.start_bot()
 
-        result_requests_vkontakte = [
-            1,
-            2,
-        ]  # Тут вставить, что возращает Вк после обработки, список либо словарь.
+        result_requests_vkontakte = []
+        while True:
+            usr = self.__vk.search_user_by_params(self.get_parametrs["sex"],
+                                                  self.get_parametrs["age"], self.get_parametrs["city"])
+            if not usr: break
+            result_requests_vkontakte.append(usr)
+
         if result_requests_vkontakte == []:
             msg = "По вашему запросу анкет нет, измените параметры запроса!"
             but_col = self.but_col()
@@ -357,9 +362,10 @@ class VkBot:
                 self.start_bot()
         elif result_requests_vkontakte != []:
             for count, info_user in enumerate(result_requests_vkontakte):
+                self.get_parametrs["id"] = info_user.id
                 self.write_msg(
                     user_id,
-                    f"{info_user}",  # Вставить фотографии {user.first_name}, {user.last_name}, 'Ссылка',
+                    f"{info_user.name}, дата рождения {info_user.bdate}, {info_user.city}",
                     keyboard=None,
                     attachment=None,
                 )
@@ -387,16 +393,16 @@ class VkBot:
                 message, user_id = self.get_message()
                 if message.lower() == "добавить в избранное":
                     """Тут вставить функцию БД на добавление в избранное, информации храниться в info_user"""
-                    data_changers.press_favorite(self.__session, user_id, self.get_parametrs["id"])
+                    set_favorite(self.__session, user_id, info_user.id)
                 elif message.lower() == "добавить в мне нравится":
                     """Тут вставить функцию БД на добавление в мне нравится, информации храниться в info_user"""
-                    data_changers.set_like(self.__session, user_id, self.get_parametrs["id"])
+                    set_like(self.__session, user_id, info_user.id)
                 elif message.lower() == "добавить в черный список":
                     """Тут вставить функцию БД на добавление в черный список, информации храниться в info_user"""
-                    data_changers.set_blocklist(self.__session, user_id, self.get_parametrs["id"])
+                    set_blocklist(self.__session, user_id, info_user.id)
                 elif message.lower() == "добавить в не нравится":
                     """Тут вставить функцию БД на добавление в мне нравится, информации храниться в info_user"""
-                    data_changers.set_dislike(self.__session, user_id, self.get_parametrs["id"])
+                    set_dislike(self.__session, user_id, info_user.id)
                 elif message.lower() == "дальше":
                     the_end(user_id)
                 elif message.lower() == "вернуться в главное меню":
@@ -421,18 +427,10 @@ class VkBot:
                     self.get_parametrs["city"] = message
                     msg = "Данные записаны, начинаем поиск!"
                     self.write_msg(user_id, msg, keyboard=None)
-
-                    usr = self.__vk.search_user_by_params(self.get_parametrs["sex"],
-                                                          self.get_parametrs["age"], self.get_parametrs["city"])
-                    msg = str(usr)
-                    self.write_msg(user_id, msg, keyboard=None)
-                    if usr:
-                        self.get_parametrs["id"] = usr.id
-
             elif int(message) < 18:
                 msg = "Аккуратно! Статься 134 УК РФ!"
                 self.write_msg(user_id, msg, keyboard=None)
-                time.sleep(5)
+                # time.sleep(5)
                 self.start_search(user_id)
 
         self.get_parametrs = {}
@@ -465,9 +463,9 @@ class VkBot:
             
 
 
-def main():
+def main(vk: VKConnector):
     # Основной цикл
-    vk_session = VkBot("config.ini")
+    vk_session = VkBot("config.ini", vk)
     message, user_id = vk_session.query_bot()
     if message.lower() == "1" or message.lower() in {"старт", "start", "привет", "hi"}:
         """Показывает главное меню"""
@@ -483,7 +481,7 @@ def main():
         vk_session.start_search(user_id)
         res = vk_session.get_parametrs  # Для поиска по Вконтакте
         if res:
-            time.sleep(3)
+            # time.sleep(3)
             vk_session.add_to_list(user_id)
     elif message.lower() == "завершить работу с ботом":
         msg = "До свидания"
@@ -492,5 +490,6 @@ def main():
 
 
 if __name__ == "__main__":
+    vk = VKConnector(open_user_token("config.ini"))
     while True:
-        main()
+        main(vk)

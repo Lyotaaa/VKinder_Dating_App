@@ -1,8 +1,9 @@
+
 from configparser import ConfigParser
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
-from DB.models import User, Likes, Dislikes, Favorites, Blocklist, create_tables
-
+from models import User, Likes, Dislikes, Favorites, Blocklist
+from main import get_DSN
 
 def open_session(dsn: str):
     """
@@ -16,7 +17,6 @@ def open_session(dsn: str):
     Session = sessionmaker(bind=engine)
     return Session()
 
-
 # User
 def update_user(session, user_id, age_range, gender, city):
     existing_user = session.query(User).filter_by(user_id=str(user_id)).first()
@@ -26,14 +26,8 @@ def update_user(session, user_id, age_range, gender, city):
         existing_user.city = city
         session.commit()
     else:
-        session.add(
-            User(
-                user_id=str(user_id),
-                age_range=str(age_range),
-                gender=(True if gender == 1 else False),
-                city=city,
-            )
-        )
+        session.add(User(user_id=str(user_id), age_range=str(age_range),
+                         gender=(True if gender == 1 else False), city=city))
         session.commit()
 
 
@@ -43,14 +37,7 @@ def get_user(user_id):
 
 # Likes
 def set_like(session, user_id, like_id):
-    existing_like = (
-        session.query(Likes)
-        .filter_by(
-            user_id=str(user_id),
-            like_id=str(like_id),
-        )
-        .first()
-    )
+    existing_like = session.query(Likes).filter_by(user_id=str(user_id), like_id=str(like_id), ).first()
     if existing_like:
         pass
     else:
@@ -59,14 +46,7 @@ def set_like(session, user_id, like_id):
 
 
 def unset_like(session, user_id, like_id):
-    existing_like = (
-        session.query(Likes)
-        .filter_by(
-            user_id=str(user_id),
-            like_id=str(like_id),
-        )
-        .first()
-    )
+    existing_like = session.query(Likes).filter_by(user_id=str(user_id), like_id=str(like_id), ).first()
     if existing_like:
         session.delete(existing_like)
         session.commit()
@@ -81,11 +61,7 @@ def get_likes(session, user_id):
 
 # Dislikes
 def set_dislike(session, user_id, dislike_id):
-    existing_dislike = (
-        session.query(Dislikes)
-        .filter_by(user_id=str(user_id), dislike_id=str(dislike_id))
-        .first()
-    )
+    existing_dislike = session.query(Dislikes).filter_by(user_id=str(user_id), dislike_id=str(dislike_id)).first()
     if existing_dislike:
         pass
     else:
@@ -94,11 +70,7 @@ def set_dislike(session, user_id, dislike_id):
 
 
 def unset_dislike(session, user_id, dislike_id):
-    existing_dislike = (
-        session.query(Dislikes)
-        .filter_by(user_id=str(user_id), dislike_id=str(dislike_id))
-        .first()
-    )
+    existing_dislike = session.query(Dislikes).filter_by(user_id=str(user_id), dislike_id=str(dislike_id)).first()
     if existing_dislike:
         session.delete(existing_dislike)
         session.commit()
@@ -112,33 +84,8 @@ def get_dislikes(session, user_id):
 
 
 # Favorites
-def set_favorite(session, user_id, favorite_id):
-    existing_favorite = (
-        session.query(Favorites)
-        .filter_by(user_id=str(user_id), favorite_id=str(favorite_id))
-        .first()
-    )
-    if existing_favorite:
-        pass
-    else:
-        session.add(Favorites(user_id=str(user_id), favorite_id=str(favorite_id)))
-        session.commit()
-
-
-def unset_favorite(session, user_id, favorite_id):
-    existing_favorite = (
-        session.query(Favorites)
-        .filter_by(user_id=str(user_id), favorite_id=str(favorite_id))
-        .first()
-    )
-
-
 def press_favorite(session, user_id, favorite_id):
-    existing_favorite = (
-        session.query(Favorites)
-        .filter_by(user_id=str(user_id), favorite_id=str(favorite_id))
-        .first()
-    )
+    existing_favorite = session.query(Favorites).filter_by(user_id=str(user_id), favorite_id=str(favorite_id)).first()
     if existing_favorite:
         session.delete(existing_favorite)
         session.commit()
@@ -153,12 +100,9 @@ def get_favorites(session, user_id):
 
 
 # Blocklist
+
 def set_blocklist(session, user_id, block_id):
-    existing_block = (
-        session.query(Blocklist)
-        .filter_by(user_id=str(user_id), block_id=str(block_id))
-        .first()
-    )
+    existing_block = session.query(Blocklist).filter_by(user_id=str(user_id), block_id=str(block_id)).first()
     if existing_block:
         pass
     else:
@@ -167,11 +111,7 @@ def set_blocklist(session, user_id, block_id):
 
 
 def unset_blocklist(session, user_id, block_id):
-    existing_block = (
-        session.query(Blocklist)
-        .filter_by(user_id=str(user_id), block_id=str(block_id))
-        .first()
-    )
+    existing_block = session.query(Blocklist).filter_by(user_id=str(user_id), block_id=str(block_id)).first()
     if existing_block:
         session.delete(existing_block)
         session.commit()
@@ -184,18 +124,9 @@ def get_blocklist(session, user_id):
     return [r.block_id for r in q.all()]
 
 
-# DSN
-def get_DSN(file_name):
-    config = ConfigParser()
-    config.read(file_name)
-    return config["DB_info"]["DSN"]
-
-
-if __name__ == "__main__":
-    DSN = get_DSN("../config.ini")
+if __name__ == '__main__':
+    DSN = get_DSN('config.ini')
     engine = sqlalchemy.create_engine(DSN)
-
-    create_tables(engine)
 
     Session = sessionmaker(bind=engine)
     session = Session()
