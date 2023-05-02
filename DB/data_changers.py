@@ -1,7 +1,7 @@
 from configparser import ConfigParser
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
-from models import User, Likes, Dislikes, Favorites, Blocklist, create_tables
+from DB.models import User, Likes, Dislikes, Favorites, Blocklist, create_tables
 
 
 def open_session(dsn: str):
@@ -131,13 +131,9 @@ def set_blocklist(session, user_id, block_id):
 
 
 def unset_blocklist(session, user_id, block_id):
-<<<<<<< HEAD:DB/data_changers.py
     existing_block = (
-        session.query(Blocklist).filter_by(user_id=str(user_id), block_id=block_id).first()
+        session.query(Blocklist).filter_by(user_id=str(user_id), block_id=str(block_id)).first()
     )
-=======
-    existing_block = session.query(Blocklist).filter_by(user_id=str(user_id), block_id=str(block_id)).first()
->>>>>>> d73dd2c (Add more Bot to DB integration):data_changers.py
     if existing_block:
         session.delete(existing_block)
         session.commit()
@@ -146,12 +142,8 @@ def unset_blocklist(session, user_id, block_id):
 
 
 def get_blocklist(session, user_id):
-<<<<<<< HEAD:DB/data_changers.py
-    return session.query(Blocklist).filter_by(user_id=str(user_id))
-=======
     q = session.query(Blocklist).filter_by(user_id=str(user_id))
     return [r.block_id for r in q.all()]
->>>>>>> d73dd2c (Add more Bot to DB integration):data_changers.py
 
 
 # DSN
